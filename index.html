@@ -68,7 +68,9 @@
           position="0 0 0"
           class="smooth-animation"
           animation-mixer="clip: *; loop: repeat; timeScale: 1"
-        ></a-gltf-model>
+          animation-name="walk" 
+          on="model-loaded: playAnimation" <!-- Event to trigger animation after model is loaded -->
+        </a-gltf-model>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 1">
@@ -79,6 +81,8 @@
           position="0 0 0.1"
           class="smooth-animation"
           animation-mixer="clip: *; loop: repeat; timeScale: 1"
+          animation-name="idle"
+          on="model-loaded: playAnimation"
         ></a-gltf-model>
       </a-entity>
 
@@ -90,8 +94,18 @@
           position="0 0 0.1"
           class="smooth-animation"
           animation-mixer="clip: *; loop: repeat; timeScale: 1"
+          animation-name="run"
+          on="model-loaded: playAnimation"
         ></a-gltf-model>
       </a-entity>
     </a-scene>
+
+    <script>
+      // Custom function to ensure the animation is played after the model is loaded
+      function playAnimation(event) {
+        const model = event.target;
+        model.setAttribute('animation-mixer', 'clip: *; loop: repeat; timeScale: 1');
+      }
+    </script>
   </body>
 </html>
