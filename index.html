@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AR Image Tracking</title>
+  <!-- Include A-Frame and MindAR -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- AR Scene -->
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; showStats: false;"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    embedded
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true"
+  >
+    <a-assets>
+      <!-- Local Models -->
+      <a-asset-item id="model1" src="./models/ELE.glb"></a-asset-item>
+      <a-asset-item id="model2" src="./models/model2.gltf"></a-asset-item>
+      <a-asset-item id="model3" src="./models/model3.gltf"></a-asset-item>
+    </a-assets>
+
+    <!-- Camera -->
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <!-- Image Targets -->
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-gltf-model id="model-target-1" src="#model1" scale="0.005 0.005 0.005" position="0 0 0.1"></a-gltf-model>
+    </a-entity>
+
+    <a-entity mindar-image-target="targetIndex: 1">
+      <a-gltf-model id="model-target-2" src="#model2" scale="0.005 0.005 0.005" position="0 0 0.1"></a-gltf-model>
+    </a-entity>
+
+    <a-entity mindar-image-target="targetIndex: 2">
+      <a-gltf-model id="model-target-3" src="#model3" scale="0.005 0.005 0.005" position="0 0 0.1"></a-gltf-model>
+    </a-entity>
+  </a-scene>
+</body>
+</html>
