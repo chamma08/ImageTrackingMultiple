@@ -63,11 +63,7 @@
       device-orientation-permission-ui="enabled: true"
     >
       <a-assets>
-        <!-- Preload the textured model -->
         <a-asset-item id="model2" src="./models/Lprd.glb"></a-asset-item>
-        <!-- Optional: preload textures separately if not embedded -->
-        <img id="texture1" src="./models/textures/Leopard_M_Roughness.jpg" />
-        <img id="texture2" src="./models/textures/Leopard_M_BaseColor.jpg" />
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -77,7 +73,8 @@
           id="model-target-2"
           src="#model2"
           scale="0.015 0.015 0.015"
-          position="0 0 0.1"
+          position="0 0 0"
+          rotation="225 0 0"
           animation-mixer="clip: *; loop: repeat; timeScale: 1"
         ></a-gltf-model>
       </a-entity>
