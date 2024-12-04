@@ -40,6 +40,7 @@
       }
 
       #place-button {
+        display: block !important;
         bottom: 80px;
       }
     </style>
@@ -90,10 +91,11 @@
       // When image is detected
       imageTarget.addEventListener("targetFound", () => {
         if (!modelData) {
+          // Show message and button
           message.style.display = "block";
           placeButton.style.display = "block";
 
-          // Store model data: position, rotation, scale
+          // Store model data
           modelData = {
             position: detectedModel.object3D.position.clone(),
             rotation: detectedModel.object3D.rotation.clone(),
