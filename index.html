@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Full-Screen AR Camera</title>
+  <title>AR Manual Placement</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
@@ -46,7 +46,7 @@
 </head>
 <body>
   <div id="message">Image Identified Successfully!</div>
-  <button id="place-button">Place Model Anywhere</button>
+  <button id="place-button">Place Model</button>
 
   <a-scene
     mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; showStats: false;"
@@ -62,12 +62,16 @@
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <a-entity mindar-image-target="targetIndex: 0" id="image-target">
+    <!-- Image Target without model -->
+    <a-entity mindar-image-target="targetIndex: 0" id="image-target"></a-entity>
+
+    <!-- Placeholder for the manually placed model -->
+    <a-entity id="model-placeholder" visible="false">
       <a-gltf-model
-        id="model-target-1"
+        id="model-target"
         src="#model1"
         scale="5 5 5"
-        position="0 0 0"
+        position="0 0 -2"
         animation-mixer="clip: default; loop: repeat; timeScale: 1"
       ></a-gltf-model>
     </a-entity>
@@ -77,6 +81,7 @@
     const message = document.getElementById('message');
     const placeButton = document.getElementById('place-button');
     const targetEntity = document.getElementById('image-target');
+    const modelPlaceholder = document.getElementById('model-placeholder');
 
     // Show message and enable button when target is found
     targetEntity.addEventListener('targetFound', () => {
@@ -90,10 +95,15 @@
       placeButton.style.display = 'none';
     });
 
-    // Allow model to be placed anywhere
+    // Place model manually when button is clicked
     placeButton.addEventListener('click', () => {
-      targetEntity.setAttribute('mindar-image-target', 'enabled', 'false');
-      alert('You can now move and place the model anywhere.');
+      message.style.display = 'none';
+      placeButton.style.display = 'none';
+
+      // Make the model visible and allow manual placement
+      modelPlaceholder.setAttribute('visible', 'true');
+
+      alert('You can now move and place the model manually.');
     });
   </script>
 </body>
