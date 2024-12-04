@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Full-Screen AR Camera</title>
+    <title>AR Place Model</title>
     <!-- Include A-Frame and MindAR -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -24,10 +24,36 @@
         width: 100%;
         height: 100%;
       }
+
+      .button-container {
+        position: absolute;
+        bottom: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+      }
     </style>
   </head>
   <body>
-    <!-- Scene for the first .mind file -->
+    <div class="button-container">
+      <button id="place-model" disabled>Place Model Here</button>
+    </div>
+
     <a-scene
       mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; showStats: false;"
       color-space="sRGB"
@@ -37,56 +63,68 @@
       device-orientation-permission-ui="enabled: true"
     >
       <a-assets>
-        <a-asset-item id="model1" src="./models/ELE.glb"></a-asset-item>
+        <a-asset-item id="model" src="./models/ELE.glb"></a-asset-item>
       </a-assets>
 
+      <!-- Camera -->
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <a-entity mindar-image-target="targetIndex: 0">
+      <!-- Ground plane for placing the model -->
+      <a-plane
+        id="ground"
+        rotation="-90 0 0"
+        width="10"
+        height="10"
+        color="#ccc"
+        position="0 0 0"
+        visible="false"
+      ></a-plane>
+
+      <!-- Placeholder for the model -->
+      <a-entity id="model-container" visible="false">
         <a-gltf-model
-          id="model-target-1"
-          src="#model1"
+          id="model-instance"
+          src="#model"
           scale="5 5 5"
           position="0 0 0"
-          animation-mixer="clip: default; loop: repeat; timeScale: 1"
         ></a-gltf-model>
       </a-entity>
-    </a-scene>
 
-    <!-- Scene for the second .mind file -->
-    <a-scene
-      mindar-image="imageTargetSrc: ./targets2.mind; autoStart: true; showStats: false;"
-      color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
-      embedded
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: true"
-    >
-      <a-assets>
-        <a-asset-item id="model2" src="./models/animalia-leopard-male.glb"></a-asset-item>
-      </a-assets>
-
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-      <a-light type="ambient" intensity="0.5"></a-light>
-      <!-- Soft global light -->
-      <a-light
-        type="directional"
-        position="0 2 1"
-        intensity="1"
-        target="#model-target-2"
-      ></a-light>
-
+      <!-- Target detection -->
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model
-          id="model-target-2"
-          src="#model2"
-          scale="0.015 0.015 0.015"
+        <a-entity
+          id="target-indicator"
+          geometry="primitive: ring; radiusInner: 0.2; radiusOuter: 0.3"
+          material="color: yellow"
           position="0 0 0"
-          rotation="225 0 0"
-          animation-mixer="clip: szkielet-0; loop: repeat; timeScale: 1"
-        ></a-gltf-model>
+        ></a-entity>
       </a-entity>
     </a-scene>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const button = document.getElementById("place-model");
+        const modelContainer = document.getElementById("model-container");
+        const ground = document.getElementById("ground");
+        const targetIndicator = document.getElementById("target-indicator");
+
+        // Enable the button when the image target is detected
+        targetIndicator.addEventListener("targetFound", () => {
+          button.disabled = false;
+        });
+
+        targetIndicator.addEventListener("targetLost", () => {
+          button.disabled = true;
+        });
+
+        // Place the model on the ground when the button is clicked
+        button.addEventListener("click", () => {
+          modelContainer.setAttribute("visible", true);
+          ground.setAttribute("visible", true);
+          modelContainer.setAttribute("position", "0 0 0");
+          button.disabled = true; // Prevent further clicks until target re-detected
+        });
+      });
+    </script>
   </body>
 </html>
