@@ -45,7 +45,6 @@
     </style>
   </head>
   <body>
-    <div id="message">Image Identified Successfully!</div>
     <button id="place-button">Place Model</button>
 
     <a-scene
@@ -121,23 +120,25 @@
       // On button click, place the model manually
       placeButton.addEventListener("click", () => {
         if (modelData) {
-          // Show model placeholder
+          // Show the model placeholder
           modelPlaceholder.setAttribute("visible", "true");
 
-          // Set the position, rotation, and scale from stored data
+          // Copy the position, rotation, and scale from the detected model
           modelPlaceholder.object3D.position.copy(modelData.position);
           modelPlaceholder.object3D.rotation.copy(modelData.rotation);
           modelPlaceholder.object3D.scale.copy(modelData.scale);
 
-          // Move model placeholder to new manual position
-          modelPlaceholder.object3D.position.set(0, 0, -2);
-          modelPlaceholder.object3D.scale.set(5, 5, 5);
+          // Move the placeholder to the desired manual position
+          modelPlaceholder.object3D.position.set(0, 0, -2); // Adjust this as needed
+          modelPlaceholder.object3D.scale.set(5, 5, 5); // Adjust this as needed
 
-          // Hide the message and button
+          // Ensure the message and button are hidden after placing the model
           message.style.display = "none";
           placeButton.style.display = "none";
 
           alert("Model placed manually!");
+        } else {
+          alert("No model data available to place.");
         }
       });
     </script>
