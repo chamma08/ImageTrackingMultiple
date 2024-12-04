@@ -63,7 +63,7 @@
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <!-- Image Target -->
-    <a-entity mindar-image-target="targetIndex: 0" id="image-target">
+    <a-entity id="image-target" mindar-image-target="targetIndex: 0">
       <a-gltf-model
         id="detected-model"
         src="#model1"
@@ -93,25 +93,28 @@
 
     // When image is detected
     imageTarget.addEventListener('targetFound', () => {
-      message.style.display = 'block';
-      placeButton.style.display = 'block';
+      if (!modelData) {
+        message.style.display = 'block';
+        placeButton.style.display = 'block';
 
-      // Save model data
-      const position = detectedModel.object3D.position.clone();
-      const rotation = detectedModel.object3D.rotation.clone();
-      const scale = detectedModel.object3D.scale.clone();
+        // Save model data
+        const position = detectedModel.object3D.position.clone();
+        const rotation = detectedModel.object3D.rotation.clone();
+        const scale = detectedModel.object3D.scale.clone();
 
-      modelData = { position, rotation, scale };
+        modelData = { position, rotation, scale };
 
-      // Stop further tracking
-      detectedModel.setAttribute('visible', 'true');
-      imageTarget.setAttribute('mindar-image-target', 'enabled', 'false');
+        // Stop further tracking
+        imageTarget.removeAttribute('mindar-image-target');
+      }
     });
 
     // When image is lost
     imageTarget.addEventListener('targetLost', () => {
-      message.style.display = 'none';
-      placeButton.style.display = 'none';
+      if (!modelData) {
+        message.style.display = 'none';
+        placeButton.style.display = 'none';
+      }
     });
 
     // On button click, place the model manually
@@ -123,8 +126,7 @@
         modelPlaceholder.object3D.scale.copy(modelData.scale);
         modelPlaceholder.object3D.rotation.copy(modelData.rotation);
 
-        // Hide the detected model
-        detectedModel.setAttribute('visible', 'false');
+        // Hide the message and button
         message.style.display = 'none';
         placeButton.style.display = 'none';
 
