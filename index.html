@@ -30,7 +30,7 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 1.5em;
+      font-size: 1.2em;
       color: white;
       background: rgba(0, 0, 0, 0.5);
       padding: 10px 20px;
@@ -62,17 +62,22 @@
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- Image Target without model -->
-    <a-entity mindar-image-target="targetIndex: 0" id="image-target"></a-entity>
-
-    <!-- Placeholder for the manually placed model -->
-    <a-entity id="model-placeholder" visible="false">
+    <!-- Image Target -->
+    <a-entity mindar-image-target="targetIndex: 0" id="image-target">
       <a-gltf-model
-        id="model-target"
+        id="detected-model"
         src="#model1"
         scale="5 5 5"
-        position="0 0 -2"
-        animation-mixer="clip: default; loop: repeat; timeScale: 1"
+        position="0 0 0"
+        visible="false"
+      ></a-gltf-model>
+    </a-entity>
+
+    <!-- Placeholder for manually placed model -->
+    <a-entity id="model-placeholder" visible="false">
+      <a-gltf-model
+        src="#model1"
+        scale="5 5 5"
       ></a-gltf-model>
     </a-entity>
   </a-scene>
@@ -80,30 +85,51 @@
   <script>
     const message = document.getElementById('message');
     const placeButton = document.getElementById('place-button');
-    const targetEntity = document.getElementById('image-target');
+    const imageTarget = document.getElementById('image-target');
+    const detectedModel = document.getElementById('detected-model');
     const modelPlaceholder = document.getElementById('model-placeholder');
 
-    // Show message and enable button when target is found
-    targetEntity.addEventListener('targetFound', () => {
+    let modelData = null; // To save the model data after detection
+
+    // When image is detected
+    imageTarget.addEventListener('targetFound', () => {
       message.style.display = 'block';
       placeButton.style.display = 'block';
+
+      // Save model data
+      const position = detectedModel.object3D.position.clone();
+      const rotation = detectedModel.object3D.rotation.clone();
+      const scale = detectedModel.object3D.scale.clone();
+
+      modelData = { position, rotation, scale };
+
+      // Stop further tracking
+      detectedModel.setAttribute('visible', 'true');
+      imageTarget.setAttribute('mindar-image-target', 'enabled', 'false');
     });
 
-    // Hide message when target is lost
-    targetEntity.addEventListener('targetLost', () => {
+    // When image is lost
+    imageTarget.addEventListener('targetLost', () => {
       message.style.display = 'none';
       placeButton.style.display = 'none';
     });
 
-    // Place model manually when button is clicked
+    // On button click, place the model manually
     placeButton.addEventListener('click', () => {
-      message.style.display = 'none';
-      placeButton.style.display = 'none';
+      if (modelData) {
+        // Show the model at a manual location
+        modelPlaceholder.setAttribute('visible', 'true');
+        modelPlaceholder.object3D.position.set(0, 0, -2); // Set default position
+        modelPlaceholder.object3D.scale.copy(modelData.scale);
+        modelPlaceholder.object3D.rotation.copy(modelData.rotation);
 
-      // Make the model visible and allow manual placement
-      modelPlaceholder.setAttribute('visible', 'true');
+        // Hide the detected model
+        detectedModel.setAttribute('visible', 'false');
+        message.style.display = 'none';
+        placeButton.style.display = 'none';
 
-      alert('You can now move and place the model manually.');
+        alert('Model placed manually!');
+      }
     });
   </script>
 </body>
