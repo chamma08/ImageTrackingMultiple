@@ -25,14 +25,28 @@
         height: 100%;
       }
 
+      .message-container {
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        text-align: center;
+        font-size: 18px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        display: none;
+      }
+
       .button-container {
         position: absolute;
         bottom: 10%;
         left: 50%;
         transform: translateX(-50%);
         z-index: 10;
-        display: flex;
-        gap: 10px;
+        display: none;
       }
 
       button {
@@ -44,16 +58,15 @@
         border-radius: 5px;
         cursor: pointer;
       }
-
-      button:disabled {
-        background-color: #aaa;
-        cursor: not-allowed;
-      }
     </style>
   </head>
   <body>
-    <div class="button-container">
-      <button id="confirm-placement" disabled>Place Here</button>
+    <div class="message-container" id="message">
+      Image identified successfully!
+    </div>
+
+    <div class="button-container" id="button-container">
+      <button id="place-model">Place Model</button>
     </div>
 
     <a-scene
@@ -79,65 +92,70 @@
         height="10"
         color="#ccc"
         position="0 -0.1 0"
-        shadow
       ></a-plane>
 
       <!-- Initial placement on image target -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-entity
+          id="image-detected-indicator"
+          geometry="primitive: sphere; radius: 0.1"
+          material="color: yellow"
+        >
+          <a-gltf-model
+            src="#model"
+            scale="0.5 0.5 0.5"
+            visible="false"
+          ></a-gltf-model>
+        </a-entity>
+      </a-entity>
+
+      <!-- Container for placing the model -->
       <a-entity id="model-container" visible="false">
         <a-gltf-model
           src="#model"
           scale="0.5 0.5 0.5"
-          position="0 0 0"
         ></a-gltf-model>
-      </a-entity>
-
-      <!-- Target detection -->
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-entity
-          id="model-on-target"
-          geometry="primitive: sphere; radius: 0.1"
-          material="color: yellow"
-        >
-          <a-gltf-model src="#model" scale="0.5 0.5 0.5"></a-gltf-model>
-        </a-entity>
       </a-entity>
     </a-scene>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        const confirmButton = document.getElementById("Place");
+        const message = document.getElementById("message");
+        const buttonContainer = document.getElementById("button-container");
+        const placeModelButton = document.getElementById("place-model");
         const modelContainer = document.getElementById("model-container");
         const ground = document.getElementById("ground");
-        const targetModel = document.getElementById("model-on-target");
         let modelPlaced = false;
 
-        // Enable placement mode when image target is found
-        targetModel.addEventListener("targetFound", () => {
+        // Show message when the image is detected
+        const targetIndicator = document.getElementById(
+          "image-detected-indicator"
+        );
+
+        targetIndicator.addEventListener("targetFound", () => {
           if (!modelPlaced) {
-            confirmButton.disabled = false;
-            modelContainer.setAttribute("visible", true);
+            message.style.display = "block";
+            buttonContainer.style.display = "flex";
           }
         });
 
-        targetModel.addEventListener("targetLost", () => {
+        targetIndicator.addEventListener("targetLost", () => {
           if (!modelPlaced) {
-            confirmButton.disabled = true;
+            message.style.display = "none";
           }
         });
 
-        // Allow manual placement
-        confirmButton.addEventListener("click", () => {
+        // Place the model anywhere when the button is clicked
+        placeModelButton.addEventListener("click", () => {
           modelPlaced = true;
 
-          // Make model draggable by disconnecting from target tracking
-          targetModel.removeAttribute("mindar-image-target");
+          // Hide the message and button
+          message.style.display = "none";
+          buttonContainer.style.display = "none";
 
-          // Allow movement of the model
+          // Show the model at a fixed position
           modelContainer.setAttribute("visible", true);
-          modelContainer.setAttribute("dynamic-body", "");
-
-          // Disable further tracking
-          confirmButton.disabled = true;
+          modelContainer.setAttribute("position", "0 0.2 -1");
         });
       });
     </script>
