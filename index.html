@@ -88,7 +88,7 @@
     const detectedModel = document.getElementById('detected-model');
     const modelPlaceholder = document.getElementById('model-placeholder');
 
-    let modelData = null; // To save the model data after detection
+    let modelData = null; // To store the model data after detection
 
     // When image is detected
     imageTarget.addEventListener('targetFound', () => {
@@ -96,12 +96,12 @@
         message.style.display = 'block';
         placeButton.style.display = 'block';
 
-        // Save model data
-        const position = detectedModel.object3D.position.clone();
-        const rotation = detectedModel.object3D.rotation.clone();
-        const scale = detectedModel.object3D.scale.clone();
-
-        modelData = { position, rotation, scale };
+        // Store model data: position, rotation, scale
+        modelData = {
+          position: detectedModel.object3D.position.clone(),
+          rotation: detectedModel.object3D.rotation.clone(),
+          scale: detectedModel.object3D.scale.clone()
+        };
 
         // Stop further tracking by removing mindar-image-target
         imageTarget.removeAttribute('mindar-image-target');
@@ -119,11 +119,17 @@
     // On button click, place the model manually
     placeButton.addEventListener('click', () => {
       if (modelData) {
-        // Set the position of the model at a manual location (e.g., 0, 0, -2)
+        // Show model placeholder
         modelPlaceholder.setAttribute('visible', 'true');
-        modelPlaceholder.object3D.position.set(0, 0, -2); // Set default position
-        modelPlaceholder.object3D.scale.copy(modelData.scale);
+
+        // Set the position, rotation, and scale from stored data
+        modelPlaceholder.object3D.position.copy(modelData.position);
         modelPlaceholder.object3D.rotation.copy(modelData.rotation);
+        modelPlaceholder.object3D.scale.copy(modelData.scale);
+
+        // Move model placeholder to new manual position
+        modelPlaceholder.object3D.position.set(0, 0, -2); // Set default manual position
+        modelPlaceholder.object3D.scale.set(5, 5, 5); // Reset scale if needed
 
         // Hide the message and button
         message.style.display = 'none';
