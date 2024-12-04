@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AR Place Model</title>
+    <title>AR Place Anywhere</title>
     <!-- Include A-Frame and MindAR -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -31,6 +31,8 @@
         left: 50%;
         transform: translateX(-50%);
         z-index: 10;
+        display: flex;
+        gap: 10px;
       }
 
       button {
@@ -51,7 +53,7 @@
   </head>
   <body>
     <div class="button-container">
-      <button id="place-model" disabled>Place Model Here</button>
+      <button id="confirm-placement" disabled>Place Here</button>
     </div>
 
     <a-scene
@@ -69,23 +71,22 @@
       <!-- Camera -->
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Ground plane for placing the model -->
+      <!-- Ground plane for manual placement -->
       <a-plane
         id="ground"
         rotation="-90 0 0"
         width="10"
         height="10"
         color="#ccc"
-        position="0 0 0"
-        visible="false"
+        position="0 -0.1 0"
+        shadow
       ></a-plane>
 
-      <!-- Placeholder for the model -->
+      <!-- Initial placement on image target -->
       <a-entity id="model-container" visible="false">
         <a-gltf-model
-          id="model-instance"
           src="#model"
-          scale="5 5 5"
+          scale="0.5 0.5 0.5"
           position="0 0 0"
         ></a-gltf-model>
       </a-entity>
@@ -93,36 +94,50 @@
       <!-- Target detection -->
       <a-entity mindar-image-target="targetIndex: 0">
         <a-entity
-          id="target-indicator"
-          geometry="primitive: ring; radiusInner: 0.2; radiusOuter: 0.3"
+          id="model-on-target"
+          geometry="primitive: sphere; radius: 0.1"
           material="color: yellow"
-          position="0 0 0"
-        ></a-entity>
+        >
+          <a-gltf-model src="#model" scale="0.5 0.5 0.5"></a-gltf-model>
+        </a-entity>
       </a-entity>
     </a-scene>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        const button = document.getElementById("place-model");
+        const confirmButton = document.getElementById("Place");
         const modelContainer = document.getElementById("model-container");
         const ground = document.getElementById("ground");
-        const targetIndicator = document.getElementById("target-indicator");
+        const targetModel = document.getElementById("model-on-target");
+        let modelPlaced = false;
 
-        // Enable the button when the image target is detected
-        targetIndicator.addEventListener("targetFound", () => {
-          button.disabled = false;
+        // Enable placement mode when image target is found
+        targetModel.addEventListener("targetFound", () => {
+          if (!modelPlaced) {
+            confirmButton.disabled = false;
+            modelContainer.setAttribute("visible", true);
+          }
         });
 
-        targetIndicator.addEventListener("targetLost", () => {
-          button.disabled = true;
+        targetModel.addEventListener("targetLost", () => {
+          if (!modelPlaced) {
+            confirmButton.disabled = true;
+          }
         });
 
-        // Place the model on the ground when the button is clicked
-        button.addEventListener("click", () => {
+        // Allow manual placement
+        confirmButton.addEventListener("click", () => {
+          modelPlaced = true;
+
+          // Make model draggable by disconnecting from target tracking
+          targetModel.removeAttribute("mindar-image-target");
+
+          // Allow movement of the model
           modelContainer.setAttribute("visible", true);
-          ground.setAttribute("visible", true);
-          modelContainer.setAttribute("position", "0 0 0");
-          button.disabled = true; // Prevent further clicks until target re-detected
+          modelContainer.setAttribute("dynamic-body", "");
+
+          // Disable further tracking
+          confirmButton.disabled = true;
         });
       });
     </script>
