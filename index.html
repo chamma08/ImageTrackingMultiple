@@ -7,8 +7,7 @@
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
-    body,
-    html {
+    body, html {
       margin: 0;
       padding: 0;
       width: 100%;
@@ -120,7 +119,7 @@
     // On button click, place the model manually
     placeButton.addEventListener('click', () => {
       if (modelData) {
-        // Show the model at a manual location
+        // Set the position of the model at a manual location (e.g., 0, 0, -2)
         modelPlaceholder.setAttribute('visible', 'true');
         modelPlaceholder.object3D.position.set(0, 0, -2); // Set default position
         modelPlaceholder.object3D.scale.copy(modelData.scale);
