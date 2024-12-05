@@ -1,148 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AR Manual Placement</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-      body,
-      html {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Full-Screen AR Camera</title>
+  <!-- Include A-Frame and MindAR -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
 
-      a-scene {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-      }
+    a-scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Scene for the first .mind file -->
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets1.mind; autoStart: true; showStats: false;"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    embedded
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true"
+  >
+    <a-assets>
+      <a-asset-item id="model1" src="./models/ELE.glb"></a-asset-item>
+    </a-assets>
 
-      #message,
-      #place-button {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 1.2em;
-        color: white;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        display: none;
-      }
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      #place-button {
-        display: block !important;
-        bottom: 80px;
-      }
-    </style>
-  </head>
-  <body>
-    <button id="place-button">Place Model</button>
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-gltf-model
+        id="model-target-1"
+        src="#model1"
+        scale="5 5 5"
+        position="0 0 0"
+        animation-mixer="clip: *; loop: repeat; timeScale: 1"
+      ></a-gltf-model>
+    </a-entity>
+  </a-scene>
 
-    <a-scene
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; showStats: false;"
-      color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
-      embedded
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: true"
-    >
-      <a-assets>
-        <a-asset-item id="model1" src="./models/ELE.glb"></a-asset-item>
-      </a-assets>
+  <!-- Scene for the second .mind file -->
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets2.mind; autoStart: true; showStats: false;"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    embedded
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true"
+  >
+    <a-assets>
+      <a-asset-item id="model2" src="./models/Lprd.glb"></a-asset-item>
+    </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Image Target -->
-      <a-entity id="image-target" mindar-image-target="targetIndex: 0">
-        <a-gltf-model
-          id="detected-model"
-          src="#model1"
-          scale="5 5 5"
-          position="0 0 0"
-          visible="false"
-        ></a-gltf-model>
-      </a-entity>
-
-      <!-- Placeholder for manually placed model -->
-      <a-entity id="model-placeholder" visible="false">
-        <a-gltf-model src="#model1" scale="5 5 5"></a-gltf-model>
-      </a-entity>
-    </a-scene>
-
-    <script>
-      const message = document.getElementById("message");
-      const placeButton = document.getElementById("place-button");
-      const imageTarget = document.getElementById("image-target");
-      const detectedModel = document.getElementById("detected-model");
-      const modelPlaceholder = document.getElementById("model-placeholder");
-
-      let modelData = null; // To store the model data after detection
-
-      // When image is detected
-      imageTarget.addEventListener("targetFound", () => {
-        if (!modelData) {
-          // Show message and button
-          message.style.display = "block";
-          placeButton.style.display = "block";
-
-          // Store model data
-          modelData = {
-            position: detectedModel.object3D.position.clone(),
-            rotation: detectedModel.object3D.rotation.clone(),
-            scale: detectedModel.object3D.scale.clone(),
-          };
-
-          // Stop further tracking by removing mindar-image-target
-          imageTarget.removeAttribute("mindar-image-target");
-        }
-      });
-
-      // When image is lost
-      imageTarget.addEventListener("targetLost", () => {
-        // Check if the model has already been detected
-        if (!modelData) {
-          message.style.display = "none";
-          placeButton.style.display = "none";
-        } else {
-          // Keep the model visible if detection is already complete
-          detectedModel.setAttribute("visible", "true");
-        }
-      });
-
-      // On button click, place the model manually
-      placeButton.addEventListener("click", () => {
-        if (modelData) {
-          // Show the model placeholder
-          modelPlaceholder.setAttribute("visible", "true");
-
-          // Copy the position, rotation, and scale from the detected model
-          modelPlaceholder.object3D.position.copy(modelData.position);
-          modelPlaceholder.object3D.rotation.copy(modelData.rotation);
-          modelPlaceholder.object3D.scale.copy(modelData.scale);
-
-          // Move the placeholder to the desired manual position
-          modelPlaceholder.object3D.position.set(0, 0, -2); // Adjust this as needed
-          modelPlaceholder.object3D.scale.set(5, 5, 5); // Adjust this as needed
-
-          // Ensure the message and button are hidden after placing the model
-          message.style.display = "none";
-          placeButton.style.display = "none";
-
-          alert("Model placed manually!");
-        } else {
-          alert("No model data available to place.");
-        }
-      });
-    </script>
-  </body>
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-gltf-model
+        id="model-target-2"
+        src="#model2"
+        scale="0.005 0.005 0.005"
+        position="0 0 0.1"
+        animation-mixer="clip: *; loop: repeat; timeScale: 1"
+      ></a-gltf-model>
+    </a-entity>
+  </a-scene>
+</body>
 </html>
